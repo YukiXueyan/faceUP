@@ -20,9 +20,9 @@ import PIL.Image as video_img
 
 #------------------------------------视频分帧----------------------------------------#
 # 视频源文件路径
-videos_src_path = 'D:/1_study/2.0work/faceUP/test/filmRating/Video'
+videos_src_path = './filmRating/Video'
 # 视频分帧图片父级保存路径
-videos_save_path = 'D:/1_study/2.0work/faceUP/test/filmRating/picture'
+videos_save_path = './filmRating/picture'
 # 获取视频源文件路径下的所有视频文件
 videos = os.listdir(videos_src_path)
 
@@ -31,6 +31,7 @@ for each_video in videos:
     # 生成单个视频分帧图片保存路径
     if not os.path.exists(videos_save_path + '/' + "full" + each_video.replace('.mp4', '')):
         os.mkdir(videos_save_path + '/' + "full" + each_video.replace('.mp4', ''))
+
     # 视频帧全路径
     each_video_save_full_path = os.path.join(videos_save_path, "full" + each_video.replace('.mp4', '')) + '/'
     # 视频截取部分帧全路径
@@ -51,6 +52,7 @@ for each_video in videos:
                         frame)
             # 对图片进行区域裁剪的代码块
             IMG = each_video_save_full_path + "frame%d.jpg" % frame_count  # 图片地址
+
             # 打印图片地址
             print(IMG)
             im = video_img.open(IMG)  # 用PIL打开一个图片

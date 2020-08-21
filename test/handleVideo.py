@@ -5,9 +5,9 @@ import cv2
 import PIL.Image as img
 
 # 视频源文件路径
-videos_src_path = '/Users/mac/Documents/filmRating/Video'
+videos_src_path = './filmRating/Video'
 # 视频分帧图片父级保存路径
-videos_save_path = '/Users/mac/Documents/filmRating/picture'
+videos_save_path = './filmRating/picture'
 # 获取视频源文件路径下的所有视频文件
 videos = os.listdir(videos_src_path)
 # 对各视频进行排序
@@ -17,12 +17,12 @@ i = 1
 
 for each_video in videos:
     # 生成单个视频分帧图片保存路径
-    if not os.path.exists(videos_save_path + '/' + "full"+each_video.replace('.mp4','')):
-        os.mkdir(videos_save_path + '/' + "full"+each_video.replace('.mp4',''))
+    if not os.path.exists(videos_save_path + '/' + str(i)):
+        os.mkdir(videos_save_path + '/' + str(i))
     # 视频帧全路径
-    each_video_save_full_path = os.path.join(videos_save_path, "full"+each_video.replace('.mp4','')) + '/'
+    each_video_save_full_path = os.path.join(videos_save_path, str(i)) + '/'
     # 视频截取部分帧全路径
-    each_video_savePart_full_path = os.path.join(videos_save_path, each_video.replace('.mp4','')) + '/'
+    each_video_savePart_full_path = os.path.join(videos_save_path, str(i)+'Part') + '/'
     # 视频全路径
     each_video_full_path = os.path.join(videos_src_path, each_video)
     # 创建一个视频读写类 读入视频文件
