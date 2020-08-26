@@ -43,14 +43,14 @@ def excel_to_matrix(path):
         worksheet = workbook.add_sheet("Result")
         worksheet.write(counter,0,names[counter])
         worksheet.write(counter,1,sum/row)
-    workbook.save("./filmRating/excelData/Result.xls")
+    workbook.save("Result.xls")
     print("处理完毕")
     print(datamatrix,cols)
     return datamatrix,cols
 
 
 
-datafile = "./filmRating/excelData/emotion.xls"
+datafile = "emotion.xls"
 [matrix,col] = excel_to_matrix(datafile)
 # print(col)
 # x = matrix[:,0:col-2]

@@ -20,59 +20,92 @@ import PIL.Image as video_img
 
 #------------------------------------视频分帧----------------------------------------#
 # 视频源文件路径
-videos_src_path = './filmRating/Video'
+
+videos_src_path = './Video'
 # 视频分帧图片父级保存路径
-videos_save_path = './filmRating/picture'
+videos_save_path = './Picture'
 # 获取视频源文件路径下的所有视频文件
 videos = os.listdir(videos_src_path)
+# 对各视频进行排序
+# videos.sort(key=lambda x: int(x[5:-4]))
 
 i = 1
+
 for each_video in videos:
     # 生成单个视频分帧图片保存路径
-    if not os.path.exists(videos_save_path + '/' + "full" + each_video.replace('.mp4', '')):
-        os.mkdir(videos_save_path + '/' + "full" + each_video.replace('.mp4', ''))
-
+    if not os.path.exists(videos_save_path + '/' + "full"+each_video.replace('.mp4','')):
+        os.mkdir(videos_save_path + '/' + "full"+each_video.replace('.mp4',''))
     # 视频帧全路径
-    each_video_save_full_path = os.path.join(videos_save_path, "full" + each_video.replace('.mp4', '')) + '/'
+    each_video_save_full_path = os.path.join(videos_save_path, "full"+each_video.replace('.mp4','')) + '/'
     # 视频截取部分帧全路径
-    each_video_savePart_full_path = os.path.join(videos_save_path, each_video.replace('.mp4', '')) + '/'
+    each_video_savePart_full_path = os.path.join(videos_save_path, each_video.replace('.mp4','')) + '/'
     # 视频全路径
     each_video_full_path = os.path.join(videos_src_path, each_video)
     # 创建一个视频读写类 读入视频文件
     cap = cv2.VideoCapture(each_video_full_path)
+    cap.set(cv2.CAP_PROP_POS_FRAMES, 2)
     # 初始化第一个帧号
     frame_count = 1
     success = True
+
+
+    #
+    # # 读取视频的fps(帧率),  size(分辨率)
+    # fps = cap.get(cv2.CAP_PROP_FPS)
+    # size = (cap.get(cv2.CAP_PROP_FRAME_WIDTH), cap.get(cv2.CAP_PROP_FRAME_HEIGHT))
+    # print("fps: {}\n size: {}".format(fps, size))
+    #
+    # # 读取视频时长（帧总数）
+    # total = int(cap.get(cv2.CAP_PROP_FRAME_COUNT))
+    # print("[INFO] {} total frames in video".format(total))
+    #
+    # # 设定从视频的第几帧开始读取
+    # # From :  https://blog.csdn.net/luqinwei/article/details/87973472
+    # frameToStart = 2000
+    # cap.set(cv2.CAP_PROP_POS_FRAMES, frameToStart);
+    #
 
     while (success):
         success, frame = cap.read()
         # 存储为图像
         if success == True:
-            cv2.imwrite(each_video_save_full_path + "frame%d.jpg" % frame_count,
-                        frame)
-            # 对图片进行区域裁剪的代码块
-            IMG = each_video_save_full_path + "frame%d.jpg" % frame_count  # 图片地址
+        # cv2.imwrite()指定图片存储路径和文件名，在python3种不能是中文，也不能包含空格(下一句对中文路径无效)
+            # cv2.imwrite(each_video_save_full_path + "frame%d.jpg" % frame_count,frame)
+        # 解决方法：
+            IMGPath = each_video_save_full_path + "frame%d.jpg" % frame_count  # 图片地址
+            # 由于imwrite前使用编码在python3中已经不适用，可用imencode代替
+            # 保存图片
+            cv2.imencode('.jpg', frame)[1].tofile(IMGPath)
+#对图片进行区域裁剪的代码块
+            # 便于阅读 再定义一遍IMGPath 可自动删掉
+            IMGPath = each_video_save_full_path + "frame%d.jpg" % frame_count  # 图片地址
+            # 读取图片
+            IMG = cv2.imdecode(np.fromfile(IMGPath, dtype=np.uint8), 1)
 
-            # 打印图片地址
-            print(IMG)
-            im = video_img.open(IMG)  # 用PIL打开一个图片
+        # 打印图片地址
+            print(IMGPath,'   ',type(IMG))
+            # 将OpenCV转换成PIL.Image格式
+            im = video_img.fromarray(cv2.cvtColor(IMG,cv2.COLOR_BGR2RGB))
+                # 上面已经用cv2.imdecode()读出来了，再将cv2转换成PIL的图片格式即可 原来的就不用了
+                # im = img.open(IMGPath)  # 用PIL打开一个图片
             box = (0, 0, 318, 360)  # box代表需要剪切图片的位置格式为:xmin ymin xmax ymax
             ng = im.crop(box)  # 对im进行裁剪 保存为ng(这里im保持不变)
             # ng = ng.rotate(20)  # ng为裁剪出来的图片，进行向左旋转20度 向右为负数
-            # 创建用于存放裁剪后的图片的文件夹
+        # 创建用于存放裁剪后的图片的文件夹
             if not os.path.exists(each_video_savePart_full_path):
                 os.mkdir(each_video_savePart_full_path)
-            # 打印裁剪后的图片地址
+        # 打印裁剪后的图片地址
             partPath = each_video_savePart_full_path + "frame%d.jpg" % frame_count
             print(partPath)
-            # 存储裁剪后的图片
+        # 存储裁剪后的图片
             ng.save(each_video_savePart_full_path + "frame%d.jpg" % frame_count)
-        # 裁剪并保存结束
+# 裁剪并保存结束
 
-        # 设置分帧间隔(捕获本视频的下一帧)
-        frame_count = frame_count + 500
-    # 处理下一个视频
+        #设置分帧间隔(捕获本视频的下一帧)
+        frame_count = frame_count + 500000000
+    #处理下一个视频
     i = i + 1
+
     cap.release()
 
 #-------------------------------------调用API && 照片加工--------------------------------#
@@ -81,7 +114,7 @@ ssl._create_default_https_context = ssl._create_unverified_context
 subscription_key = '144ce86219b740938b003a1f3d36a26a'  # Face API的key
 uri_base = 'https://aimovie.cognitiveservices.azure.cn/'  # Face API的end point
 #path = 'D:/1_study/2.0work/faceUP/test/filmRating/newPicture' #新电影的处理后图片
-path = 'D:/1_study/2.0work/faceUP/test/filmRating/trainingPicture'
+path = './filmRating/trainingPicture'
 def useApi(img):
     headers = {
         'Content-Type': 'application/octet-stream',
@@ -211,7 +244,7 @@ for root, dirs, files in os.walk(path, topdown=False):
         print('文件夹：' + folder + '已处理完毕')
         print(error_num, error_list)  # 异常个数、异常内容
 
-workbook.save('D:/1_study/2.0work/faceUP/test/filmRating/excelData/Face.xls')#没有打分的新电影的情绪分
+workbook.save('./filmRating/excelData/Face.xls')#没有打分的新电影的情绪分
 print('处理完毕')
 
 def excel_to_matrix(path):
@@ -241,7 +274,7 @@ def excel_to_matrix(path):
 workBook = xlwt.Workbook(encoding='utf-8')
 count = 0
 col = 0
-data_path = 'D:/1_study/2.0work/faceUP/test/filmRating/excelData/Face.xls'
+data_path = './filmRating/excelData/Face.xls'
 
 document = xlrd.open_workbook(data_path)
 allSheetNames = document.sheet_names()
@@ -283,7 +316,7 @@ for i in range(len(allSheetNames)):
         print(data)
         writeEmotion(workSheet,data)
 
-workBook.save('D:/1_study/2.0work/faceUP/test/filmRating/excelData/emotion.xls')
+workBook.save('./filmRating/excelData/emotion.xls')
 print('excel格式转换完毕')
 
 
@@ -369,9 +402,9 @@ def excel_to_matrix(path):
         ws = wb.add_sheet("Result")
         ws.write(counter, 0, names[counter])
         ws.write(counter, 1, sum / row)
-    workbook.save("D:/1_study/2.0work/faceUP/test/filmRating/excelData/Result.xls")
+    workbook.save("./filmRating/excelData/Result.xls")
     print("处理完毕")
     return datamatrix,cols
 
-datafile = "D:/1_study/2.0work/faceUP/test/filmRating/excelData/emotion.xls"  #新电影情绪分，没有观众打分
+datafile = "./filmRating/excelData/emotion.xls"  #新电影情绪分，没有观众打分
 [matrix,col] = excel_to_matrix(datafile)

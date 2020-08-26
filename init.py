@@ -82,7 +82,7 @@ def result(path,file,bri):
       print("[Errno {0}] {1}".format(e.errno, e.strerror))
 
 if __name__ == '__main__':
-   path1='img/'
+   path1='imgtest/'
    path2='img2/'
 
 #从文件夹中遍历图片
